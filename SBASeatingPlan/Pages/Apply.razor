@@ -1,0 +1,93 @@
+﻿@page "/apply"
+@using System.ComponentModel.DataAnnotations
+
+@* <CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+
+        </Authorized>
+        <NotAuthorized>
+            <Login></Login>
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState> *@
+
+<EditForm Model="dataModel" OnValidSubmit="Success">
+    <DataAnnotationsValidator />
+    <div class="mat-layout-grid">
+        <div class="mat-layout-grid-inner">
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-3-phone">
+                <p>
+                    <MatTextField Label="Name" @bind-Value="dataModel.Name"/>
+                    <ValidationMessage For="@(() => dataModel.Name)"/>
+                </p>
+                <p>
+                    <MatNumericUpDownField Label="Year of Graduation" @bind-Value="dataModel.GradTime" 
+                    Step="1" DecimalPlaces="0" Maximum="2024" Minimum="1965"/>
+                    <ValidationMessage For="@(() => dataModel.GradTime)" />
+                </p>
+                <p>
+                    <MatSelectItem Items="Sex" Label="Sex" @bind-Value="dataModel.Sex" />
+                    <ValidationMessage For="@(() => dataModel.Sex)" />
+                </p>
+                <p>
+                    <MatTextField TValue="int" Label="Age" @bind-Value="dataModel.Age" />
+                    <ValidationMessage For="@(() => dataModel.Age)" />
+                </p>
+                <p>
+                    <MatSelectItem Items="Employments" Label="Employment" @bind-Value="dataModel.Employment" />
+                    <ValidationMessage For="@(() => dataModel.Employment)" />
+                </p>
+                <p>
+                    <MatTextField Label="Seats" @bind-Value="dataModel.SeatsRequired" Disabled=true/>
+                    <MatSlider TValue="int" @bind-Value="dataModel.SeatsRequired" Step="1" EnableStep=true 
+                    ValueMin="1" ValueMax="8"/>
+                    <ValidationMessage For="@(() => dataModel.SeatsRequired)" />
+                </p>
+                <MatButton Type="submit" Label="Submit" Raised=true/>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+@code {
+    [Inject]
+    IJSRuntime JS { get; set; }
+    async Task Success() => await JS.InvokeAsync<object>("alert", "Successful login!");
+
+    string[] Sex = ["Male", "Female", "Other"];
+
+    string[] Employments = [
+        "Unemployed", "Student", "Teacher", "Computer Related", "Other"
+    ];
+
+    ApplyDataModel dataModel = new()
+    {
+        Age = 18,
+        GradTime = 2019,
+        SeatsRequired = 1,
+    };
+
+    public class ApplyDataModel
+    {
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        [CustomValidation(typeof(ApplyDataModel), nameof(ValidateGradTime))]
+        public int GradTime { get; set; }
+        [Required]
+        public string Sex { get; set; }
+        [Required]
+        public int Age { get; set; }
+        [Required]
+        public string Employment { get; set; }
+        [Required]
+        public int SeatsRequired { get; set; }
+
+        public static ValidationResult ValidateGradTime(int gradTime, ValidationContext vc)
+        {
+            return gradTime < 2024 ? ValidationResult.Success : new ValidationResult($"Invalid Time {gradTime}", [vc.MemberName]);
+        }
+    }
+}

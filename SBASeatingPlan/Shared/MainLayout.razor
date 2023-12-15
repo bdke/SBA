@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <MatAppBarContainer>
+        <MatAppBar Fixed="true">
+            <MatAppBarRow>
+                <MatAppBarSection>
+                    <MatIconButton Icon="menu" OnClick="(e) => ButtonClicked()"></MatIconButton>
+                    <MatAppBarTitle>LKPFC App</MatAppBarTitle>
+                </MatAppBarSection>
+                <MatAppBarSection Align="@MatAppBarSectionAlign.End">
+                    <MatIconButton Icon="contact_support"></MatIconButton>
+                </MatAppBarSection>
+            </MatAppBarRow>
+        </MatAppBar>
+        <MatDrawerContainer Style="width: 100vw; height: 100vh;position: absolute; top:0; left: 0;">
+            <MatDrawer @bind-Opened="@Opened" Mode="@MatDrawerMode.Modal">
+                <MatIconButton Icon="keyboard_backspace" OnClick="(e) => ButtonClicked()"></MatIconButton>
+                <MatNavMenu>
+                    <MatNavItem Href="/"><MatIcon Icon="home"/> Home</MatNavItem>
+                    <MatNavItem Href="/apply"><MatIcon Icon="assessment" /> Apply</MatNavItem>
+                </MatNavMenu>
+            </MatDrawer>
+        </MatDrawerContainer>
+        <MatAppBarContent Style="position: absolute; top:0; left: 0;">
+            @Body
+        </MatAppBarContent>
+    </MatAppBarContainer>
+</div>
+
+@code
+{
+    bool Opened = false;
+
+    void ButtonClicked()
+    {
+        Opened = !Opened;
+    }
+
+}

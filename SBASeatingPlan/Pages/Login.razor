@@ -1,0 +1,19 @@
+﻿@page "/login"
+@using SBASeatingPlan.Auth0
+@inject AuthenticationStateProvider authStateProvider
+
+<div class="mat-layout-grid">
+    <div class="mat-layout-grid-inner">
+        <img class="mat-layout-grid-cell mat-layout-grid-cell-span-4-phone center" 
+        src="images/school_logo.jpg" style="text-align:center"/>
+        <MatButton Raised="true" OnClick="UserLogin" Label="Login" class="mat-layout-grid-cell mat-layout-grid-cell-span-4-phone"></MatButton>
+    </div>
+</div>
+
+@code {
+    public async Task UserLogin()
+    {
+        await ((Auth0AuthenticationStateProvider)authStateProvider)
+            .LogInAsync();
+    }
+}
