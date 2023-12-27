@@ -1,16 +1,12 @@
 ﻿@page "/apply"
 @using System.ComponentModel.DataAnnotations
-
-@* <CascadingAuthenticationState>
-    <AuthorizeView>
-        <Authorized>
-
-        </Authorized>
-        <NotAuthorized>
-            <Login></Login>
-        </NotAuthorized>
-    </AuthorizeView>
-</CascadingAuthenticationState> *@
+@using Firebase.Auth
+@using Firebase.Database
+@using Firebase.Database.Query
+@using SBASeatingPlan.Models
+@inject IMatDialogService dialogueService
+@inject FirebaseClient firebaseClient
+@inject FirebaseAuthClient authClient
 
 <EditForm Model="dataModel" OnValidSubmit="Success">
     <DataAnnotationsValidator />
@@ -44,7 +40,14 @@
                     ValueMin="1" ValueMax="8"/>
                     <ValidationMessage For="@(() => dataModel.SeatsRequired)" />
                 </p>
-                <MatButton Type="submit" Label="Submit" Raised=true/>
+                @if (startLoading)
+                {
+                    <MatProgressCircle Indeterminate="true" Size="MatProgressCircleSize.Medium" />
+                }
+                else
+                {
+                    <MatButton Type="submit" Label="Submit/Edit" Raised=true />
+                }
             </div>
         </div>
     </div>
@@ -52,42 +55,47 @@
 
 
 @code {
-    [Inject]
-    IJSRuntime JS { get; set; }
-    async Task Success() => await JS.InvokeAsync<object>("alert", "Successful login!");
-
     string[] Sex = ["Male", "Female", "Other"];
 
     string[] Employments = [
         "Unemployed", "Student", "Teacher", "Computer Related", "Other"
     ];
 
-    ApplyDataModel dataModel = new()
+    SubmittionModel dataModel = new()
     {
         Age = 18,
         GradTime = 2019,
         SeatsRequired = 1,
     };
 
-    public class ApplyDataModel
-    {
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        [CustomValidation(typeof(ApplyDataModel), nameof(ValidateGradTime))]
-        public int GradTime { get; set; }
-        [Required]
-        public string Sex { get; set; }
-        [Required]
-        public int Age { get; set; }
-        [Required]
-        public string Employment { get; set; }
-        [Required]
-        public int SeatsRequired { get; set; }
+    bool startLoading = false;
 
-        public static ValidationResult ValidateGradTime(int gradTime, ValidationContext vc)
+    async Task Success()
+    {
+        startLoading = true;
+        var email = authClient.User.Info.Email;
+
+        //fetch database
+        var users = await firebaseClient.Child("users").OnceAsync<UserModel>();
+        var submittions = await firebaseClient.Child("submittions").OnceAsync<UserModel>();
+
+        //get entry code
+        var user = users.First(v => v.Object.Email == email);
+        var entryCode = user.Object.EntryCode;
+        dataModel.EntryCode = entryCode;
+
+        var submittion = submittions.FirstOrDefault(v => v.Object.EntryCode == entryCode);
+        if (submittion != null)
         {
-            return gradTime < 2024 ? ValidationResult.Success : new ValidationResult($"Invalid Time {gradTime}", [vc.MemberName]);
+            await firebaseClient.Child("submittions").Child(submittion.Key).PutAsync(dataModel);
+            await dialogueService.AlertAsync("Edit Success!");
         }
+        else
+        {
+            await firebaseClient.Child("submittions").PostAsync(dataModel);
+            await dialogueService.AlertAsync("Submittion Success!");
+        }
+
+        startLoading = false;
     }
 }

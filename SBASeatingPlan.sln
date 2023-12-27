@@ -5,6 +5,8 @@ VisualStudioVersion = 17.8.34112.27
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SBASeatingPlan", "SBASeatingPlan\SBASeatingPlan.csproj", "{2CC05F92-8BD9-4230-89D3-3CFB3C27FE30}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SBASeatingPlan.Admin", "SBASeatingPlan.Admin\SBASeatingPlan.Admin.csproj", "{D1394ACB-18BC-42C6-8646-8395AAD48604}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{2CC05F92-8BD9-4230-89D3-3CFB3C27FE30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CC05F92-8BD9-4230-89D3-3CFB3C27FE30}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2CC05F92-8BD9-4230-89D3-3CFB3C27FE30}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{D1394ACB-18BC-42C6-8646-8395AAD48604}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1394ACB-18BC-42C6-8646-8395AAD48604}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1394ACB-18BC-42C6-8646-8395AAD48604}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1394ACB-18BC-42C6-8646-8395AAD48604}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

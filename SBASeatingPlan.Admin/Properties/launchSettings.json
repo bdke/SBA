@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SBASeatingPlan.Admin": {
+      "commandName": "Project",
+      "commandLineArgs": "generate -b -a -e"
+    }
+  }
+}

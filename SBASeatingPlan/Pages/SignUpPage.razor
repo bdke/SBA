@@ -1,0 +1,99 @@
+﻿@page "/signup"
+@using Firebase.Auth
+@using Firebase.Database
+@using Firebase.Database.Query
+@using SBASeatingPlan.Models
+@inject IMatDialogService dialogueService
+@inject FirebaseAuthClient authClient
+@inject FirebaseClient firebaseClient
+@inject NavigationManager navManager
+
+<EditForm Model="dataModel" OnValidSubmit="Success">
+    <DataAnnotationsValidator />
+    <div class="mat-layout-grid">
+        <div class="mat-layout-grid-inner">
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-3-phone">
+                <p>
+                    <MatTextField @bind-Value="dataModel.Email" Label="Email" />
+                    <ValidationMessage For="@(() => dataModel.Email)" />
+                </p>
+                <p>
+                    <MatTextField @bind-Value="dataModel.EntryCode" Label="Entry Code" />
+                    <ValidationMessage For="@(() => dataModel.EntryCode)" />
+                </p>
+                <p>
+                    <MatTextField Type="password" @bind-Value="dataModel.Password" Label="Password" />
+                    <ValidationMessage For="@(() => dataModel.Password)" />
+                </p>
+                <p>
+                    <MatTextField Type="password" @bind-Value="dataModel.PasswordConfirm" Label="Password" />
+                    <ValidationMessage For="@(() => dataModel.PasswordConfirm)" />
+                </p>
+            </div>
+            @if (startLoading)
+            {
+                <MatProgressCircle Indeterminate="true" Size="MatProgressCircleSize.Medium" />
+            }
+            else
+            {
+                <MatButton Type="submit" Label="Signup" Raised=true />
+            }
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    SignUpModel dataModel = new();
+    bool startLoading = false;
+    async Task Success()
+    {
+        startLoading = true;
+        //check same password
+        if (dataModel.Password != dataModel.PasswordConfirm)
+        {
+            await dialogueService.AlertAsync($"Password and PasswordConfirm is different");
+            startLoading = false;
+            return;
+        }
+
+        //check entry code
+        var users = await firebaseClient.Child("users").OnceAsync<UserModel>();
+        var emails = users.Select(v => v.Object.Email);
+        var dbuser = users.FirstOrDefault(v => v.Object.EntryCode == dataModel.EntryCode);
+
+        if (dbuser == null)
+        {
+            await dialogueService.AlertAsync($"Invalid entry code");
+            startLoading = false;
+            return;
+        }
+
+        if (dbuser.Object.Email != string.Empty)
+        {
+            await dialogueService.AlertAsync($"The entry code has registered");
+            startLoading = false;
+            return;
+        }
+
+        if (emails.Contains(dataModel.Email))
+        {
+            await dialogueService.AlertAsync($"The email has registered");
+            startLoading = false;
+            return;
+        }
+
+        //update database
+        var model = new UserModel()
+        {
+            Email = dataModel.Email,
+            EntryCode = dataModel.EntryCode
+        };
+        await firebaseClient.Child("users").Child(dbuser.Key).PutAsync(model);
+        Console.WriteLine(dbuser.Key);
+
+        var user = await authClient.CreateUserWithEmailAndPasswordAsync(dataModel.Email, dataModel.Password);
+        await dialogueService.AlertAsync($"Signup Success as {dataModel.Email}");
+        startLoading = false;
+        navManager.NavigateTo("/");
+    }
+}

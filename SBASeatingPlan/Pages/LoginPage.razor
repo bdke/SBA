@@ -1,0 +1,52 @@
+﻿@page "/login"
+@using Firebase.Auth
+@using SBASeatingPlan.Models
+@inject IMatDialogService dialogueService
+@inject FirebaseAuthClient authClient
+@inject NavigationManager navManager
+
+<EditForm Model="dataModel" OnValidSubmit="Success">
+    <DataAnnotationsValidator />
+    <div class="mat-layout-grid">
+        <div class="mat-layout-grid-inner">
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-3-phone">
+                <p>
+                    <MatTextField @bind-Value="dataModel.Email" Label="Email" />
+                    <ValidationMessage For="@(() => dataModel.Email)" />
+                </p>
+                <p>
+                    <MatTextField Type="password" @bind-Value="dataModel.Password" Label="Password" />
+                    <ValidationMessage For="@(() => dataModel.Password)" />
+                </p>
+            </div>
+            @if (startLoading)
+            {
+                <MatProgressCircle Indeterminate="true" Size="MatProgressCircleSize.Medium" />
+            }
+            else
+            {
+                <MatButton Type="submit" Label="Login" Raised=true />
+            }
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    LoginModel dataModel = new();
+    bool startLoading = false;
+    async Task Success()
+    {
+        startLoading = true;
+        try
+        {
+            var user = await authClient.SignInWithEmailAndPasswordAsync(dataModel.Email, dataModel.Password);
+            await dialogueService.ConfirmAsync($"Login Success as {dataModel.Email}");
+            navManager.NavigateTo("/");
+        }
+        catch (FirebaseAuthException)
+        {
+            await dialogueService.ConfirmAsync($"Invalid Email or Password");
+        }
+        startLoading = false;
+    }
+}

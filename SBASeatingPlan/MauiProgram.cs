@@ -1,12 +1,14 @@
-﻿using MatBlazor;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Firebase.Auth;
+using Firebase.Auth.Providers;
+using Firebase.Database;
+using MatBlazor;
 using Microsoft.Extensions.Logging;
-using SBASeatingPlan.Auth0;
 
 namespace SBASeatingPlan
 {
     public static class MauiProgram
     {
+        private const string BASE_URL = "lkpfcsba.firebaseapp.com";
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
@@ -20,19 +22,21 @@ namespace SBASeatingPlan
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Logging.AddDebug();
 #endif
             builder.Services.AddMatBlazor();
-            builder.Services.AddSingleton(new Auth0Client(new()
+
+            builder.Services.AddSingleton(new FirebaseAuthClient(new FirebaseAuthConfig()
             {
-                Domain = "dev-kkiz0nhcdyjfur5c.us.auth0.com",
-                ClientId = "a4fWMPaDYwJ5cCbFNmxFwCcK3dP4ib8y",
-                Scope = "openid profile",
-                RedirectUri = "myapp://callback"
+                ApiKey = "\r\nAIzaSyBgg0RWTSlQWh1RG14iKNqxd4it9YDbApA",
+                AuthDomain = BASE_URL,
+                Providers =
+                [
+                    new EmailProvider(), new GoogleProvider(),
+                ]
             }));
-            builder.Services.AddAuthorizationCore();
-            builder.Services.AddScoped<AuthenticationStateProvider, Auth0AuthenticationStateProvider>();
+            builder.Services.AddSingleton(new FirebaseClient("https://lkpfcsba-default-rtdb.asia-southeast1.firebasedatabase.app/"));
 
             return builder.Build();
         }

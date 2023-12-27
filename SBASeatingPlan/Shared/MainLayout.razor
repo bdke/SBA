@@ -1,25 +1,36 @@
-﻿@inherits LayoutComponentBase
+﻿@using Firebase.Auth
+@inherits LayoutComponentBase
+@inject FirebaseAuthClient authClient
+@inject IMatDialogService dialogueService
+@inject NavigationManager navManager
 
 <div class="page">
     <MatAppBarContainer>
         <MatAppBar Fixed="true">
             <MatAppBarRow>
                 <MatAppBarSection>
-                    <MatIconButton Icon="menu" OnClick="(e) => ButtonClicked()"></MatIconButton>
+                    @if (authClient.User != null)
+                    {
+                        <MatIconButton Icon="menu" OnClick="(e) => ButtonClicked()"></MatIconButton>
+                    }
                     <MatAppBarTitle>LKPFC App</MatAppBarTitle>
                 </MatAppBarSection>
                 <MatAppBarSection Align="@MatAppBarSectionAlign.End">
-                    <MatIconButton Icon="contact_support"></MatIconButton>
+                    @if (authClient.User != null)
+                    {
+                        <MatIconButton OnClick="SignOut" Icon="@MatIconNames.Exit_to_app"></MatIconButton>
+                    }
                 </MatAppBarSection>
             </MatAppBarRow>
         </MatAppBar>
         <MatDrawerContainer Style="width: 100vw; height: 100vh;position: absolute; top:0; left: 0;">
             <MatDrawer @bind-Opened="@Opened" Mode="@MatDrawerMode.Modal">
-                <MatIconButton Icon="keyboard_backspace" OnClick="(e) => ButtonClicked()"></MatIconButton>
+                <MatIconButton Icon="@MatIconNames.Arrow_back" OnClick="(e) => ButtonClicked()"></MatIconButton>
                 <MatNavMenu>
-                    <MatNavItem Href="/"><MatIcon Icon="home"/> Home</MatNavItem>
-                    <MatNavItem Href="/apply"><MatIcon Icon="assessment" /> Apply</MatNavItem>
+                    <MatNavItem OnClick="(e) => ButtonClicked()" Href="/"><MatIcon Icon="home" /> Home</MatNavItem>
+                    <MatNavItem OnClick="(e) => ButtonClicked()" Href="/apply"><MatIcon Icon="assessment" /> Apply</MatNavItem>
                 </MatNavMenu>
+                
             </MatDrawer>
         </MatDrawerContainer>
         <MatAppBarContent Style="position: absolute; top:0; left: 0;">
@@ -37,4 +48,13 @@
         Opened = !Opened;
     }
 
+    async Task SignOut()
+    {
+        var result = await dialogueService.ConfirmAsync("Do you want to Sign Out?");
+        if (result)
+        {
+            authClient.SignOut();
+            navManager.NavigateTo("/", true);
+        }
+    }
 }
